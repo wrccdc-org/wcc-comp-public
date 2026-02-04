@@ -1,0 +1,44 @@
+{
+  "core_team": [
+    {
+      "name": "Dr. Brandon Brown",
+      "role": "Competition Director",
+      "bio": "Dr. Brown leads WRCCDC operations and coordinates with regional partners. He is a faculty member at Coastline Community College and has been involved with CCDC since 2015.",
+      "photo": "/images/volunteers/brandon-brown.jpg",
+      "email": "brandon.brown@wccomps.org",
+      "linkedin": "https://linkedin.com/in/drbrandonbrown"
+    },
+    {
+      "name": "Example Volunteer",
+      "role": "Red Team Lead",
+      "bio": "Leading red team operations with over 10 years of penetration testing experience. Specializes in infrastructure attacks and social engineering.",
+      "photo": "/images/volunteers/placeholder.jpg",
+      "linkedin": ""
+    }
+  ],
+  "red_team": [
+    {
+      "name": "Example Red Team Member",
+      "role": "Senior Penetration Tester",
+      "bio": "Professional security consultant specializing in web application security and network penetration testing.",
+      "photo": "/images/volunteers/placeholder.jpg"
+    }
+  ],
+  "white_team": [
+    {
+      "name": "Example White Team Member",
+      "role": "Scoring Engine Administrator",
+      "bio": "Network engineer with expertise in competition infrastructure and automated scoring systems.",
+      "photo": "/images/volunteers/placeholder.jpg"
+    }
+  ],
+  "mentors": [
+    {
+      "name": "Example Mentor",
+      "role": "Security Engineer",
+      "bio": "Security engineer at a major tech company, mentoring teams on defense strategies and career development.",
+      "photo": "/images/volunteers/placeholder.jpg",
+      "company": "Example Tech Corp"
+    }
+  ]
+}

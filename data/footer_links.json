@@ -1,0 +1,37 @@
+{
+  "quick_links": [
+    {
+      "name": "About Us",
+      "url": "/about/"
+    },
+    {
+      "name": "Competitions",
+      "url": "/competitions/"
+    },
+    {
+      "name": "Sponsor Us",
+      "url": "/sponsor/"
+    },
+    {
+      "name": "Volunteer",
+      "url": "/volunteer/"
+    }
+  ],
+  "socials": [
+    {
+      "name": "Email",
+      "icon": "bi-envelope",
+      "url": "mailto:info@wccomps.org"
+    },
+    {
+      "name": "GitHub",
+      "icon": "bi-github",
+      "url": "https://github.com/wrccdc-org"
+    },
+    {
+      "name": "Archive",
+      "icon": "bi-archive",
+      "url": "https://archive.wccomps.org"
+    }
+  ]
+}

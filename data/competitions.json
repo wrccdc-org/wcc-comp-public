@@ -1,0 +1,182 @@
+{
+  "competitions": [
+    {
+      "id": "wrccdc",
+      "name": "WRCCDC",
+      "full_name": "Western Regional Collegiate Cyber Defense Competition",
+      "description": "The premier cyber defense competition for the Western United States. Teams defend corporate networks against live red team attacks while maintaining business operations.",
+      "icon": "shield-check",
+      "years": [
+        {
+          "year": 2026,
+          "theme": "Critical Infrastructure Protection",
+          "timezone": "PST",
+          "events": [
+            {
+              "name": "Invitational #1",
+              "date": "Saturday, Oct. 11, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #2",
+              "date": "Sunday, Nov. 2, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #3",
+              "date": "Saturday, Nov. 15, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #4",
+              "date": "Saturday, Dec. 6, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #5",
+              "date": "Saturday, Dec. 20, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #6",
+              "date": "Saturday, Jan. 24, 2026",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Qualifiers",
+              "date": "Saturday, Feb. 7, 2026",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Regionals",
+              "date": "Friday, Mar. 20, 2026 - Saturday, Mar. 21, 2026",
+              "time": "9:00 a.m. - 6:00 p.m."
+            }
+          ],
+          "winner": "TBD",
+          "runner_up": "TBD",
+          "third_place": "TBD"
+        },
+        {
+          "year": 2024,
+          "theme": "Financial Services Security",
+          "qualifier_date": "February 10, 2024",
+          "regional_date": "March 22-24, 2024",
+          "winner": "Stanford University",
+          "runner_up": "UC Irvine",
+          "third_place": "Arizona State University"
+        },
+        {
+          "year": 2023,
+          "theme": "Healthcare IT Security",
+          "winner": "UC Irvine",
+          "runner_up": "Stanford University",
+          "third_place": "Cal Poly Pomona"
+        }
+      ]
+    },
+    {
+      "id": "prccdc",
+      "name": "PRCCDC",
+      "full_name": "Pacific Rim Collegiate Cyber Defense Competition",
+      "description": "Serving schools in Alaska, Hawaii, Guam, and the Pacific territories. A unique regional competition addressing the specific security challenges of island and remote networks.",
+      "icon": "globe",
+      "years": [
+        {
+          "year": 2026,
+          "theme": "Island Infrastructure Security",
+          "timezone": "PST",
+          "events": [
+            {
+              "name": "Regionals",
+              "date": "March 20 - March 22, 2026",
+              "time": "TBA"
+            }
+          ],
+          "winner": "TBD",
+          "runner_up": "TBD",
+          "third_place": "TBD"
+        }
+      ]
+    },
+    {
+      "id": "circus",
+      "name": "CIRCUS",
+      "full_name": "Collegiate Incident Response Competition for Undergraduate Students",
+      "description": "A digital forensics and incident response competition focused on investigating security incidents, analyzing artifacts, and providing comprehensive incident reports.",
+      "icon": "search",
+      "years": [
+        {
+          "year": 2026,
+          "theme": "Advanced Persistent Threats",
+          "timezone": "PST",
+          "events": [
+            {
+              "name": "Invitational #1",
+              "date": "Saturday, Oct. 11, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #2",
+              "date": "Sunday, Nov. 2, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #3",
+              "date": "Saturday, Nov. 15, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #4",
+              "date": "Saturday, Dec. 6, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #5",
+              "date": "Saturday, Dec. 20, 2025",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Invitational #6",
+              "date": "Saturday, Jan. 24, 2026",
+              "time": "9:00 a.m. - 5:00 p.m."
+            },
+            {
+              "name": "Qualifiers",
+              "date": "Saturday, Feb. 7, 2026",
+              "time": "TBA"
+            },
+            {
+              "name": "Regionals",
+              "date": "Friday, Mar. 20, 2026 - Saturday, Mar. 21, 2026",
+              "time": "TBA"
+            },
+            {
+              "name": "Finals",
+              "date": "March 5-8, 2026",
+              "time": "9:00 a.m. - 3:00 p.m."
+            }
+          ],
+          "winner": "TBD",
+          "runner_up": "TBD",
+          "third_place": "TBD"
+        }
+      ]
+    },
+    {
+      "id": "hackercamp",
+      "name": "HackerCamp",
+      "full_name": "Summer Cybersecurity Training Camp",
+      "description": "An intensive summer program providing students with hands-on cybersecurity training, mentorship, and career preparation. Participants learn offensive and defensive security techniques.",
+      "icon": "sun",
+      "years": [
+        {
+          "year": 2025,
+          "theme": "Cloud Security & DevSecOps",
+          "date": "July 2025 (Exact dates TBD)",
+          "participants": "TBD"
+        }
+      ]
+    }
+  ]
+}

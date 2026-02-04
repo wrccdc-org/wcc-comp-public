@@ -1,0 +1,204 @@
+{{ define "main" }}
+
+{{ if .Site.Params.enable_carousel }}
+<!-- Hero Carousel -->
+<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-slide bg-primary">
+                <div class="container">
+                    <div class="row align-items-center min-vh-70">
+                        <div class="col-lg-8 mx-auto text-center text-white">
+                            <h1 class="display-2 fw-bold mb-4">Building Tomorrow's Security Professionals</h1>
+                            <p class="lead mb-4">WCCOMPS organizes premier cybersecurity competitions across the Western United States and Pacific Rim, providing students with real-world experience defending networks against professional adversaries.</p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a href="/competitions/" class="btn btn-light btn-lg">Explore Competitions</a>
+                                <a href="/volunteer/" class="btn btn-outline-light btn-lg">Get Involved</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-gradient-secondary">
+                <div class="container">
+                    <div class="row align-items-center min-vh-70">
+                        <div class="col-lg-8 mx-auto text-center text-white">
+                            <h1 class="display-2 fw-bold mb-4">World-Class Competitions</h1>
+                            <p class="lead mb-4">From CCDC regional championships to specialized DFIR competitions and intensive summer training camps, we offer diverse opportunities for students to test and develop their skills.</p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a href="/schedule/" class="btn btn-light btn-lg">View Schedule</a>
+                                <a href="/sponsor/" class="btn btn-outline-light btn-lg">Become a Sponsor</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-gradient-accent">
+                <div class="container">
+                    <div class="row align-items-center min-vh-70">
+                        <div class="col-lg-8 mx-auto text-center text-white">
+                            <h1 class="display-2 fw-bold mb-4">Community-Driven Excellence</h1>
+                            <p class="lead mb-4">Powered by dedicated volunteers, supported by industry leaders, and trusted by educators across the region. Together, we're closing the cybersecurity skills gap.</p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a href="/about/" class="btn btn-light btn-lg">Learn More</a>
+                                <a href="/resources/" class="btn btn-outline-light btn-lg">View Resources</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+{{ else }}
+<!-- Simple Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-3 fw-bold mb-4">Western Coalition of Competitions</h1>
+                <p class="lead mb-4">Building the future of cybersecurity through premier competitions, education, and community development</p>
+                <div class="d-flex gap-3">
+                    <a href="/competitions/" class="btn btn-light btn-lg">Explore Competitions</a>
+                    <a href="/sponsor/" class="btn btn-outline-light btn-lg">Become a Sponsor</a>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center">
+                <i class="bi bi-trophy-fill" style="font-size: 150px; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+{{ end }}
+
+<!-- About Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Who We Are</h2>
+                <p class="lead">The Western Coalition of Competitions (WCCOMPS) is the premier organization dedicated to developing the next generation of cybersecurity professionals through hands-on competitions, comprehensive training, and community support.</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-trophy-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Premier Competitions</h4>
+                    <p>We organize WRCCDC, PRCCDC, CIRCUS, and HackerCamp - competitions that set the standard for cybersecurity education.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Student Success</h4>
+                    <p>Thousands of students trained, hundreds launched into successful security careers, with hands-on experience that employers value.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-globe" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Regional Impact</h4>
+                    <p>Serving the Western U.S. and Pacific Rim, partnering with universities and industry to strengthen cybersecurity education.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Competitions Overview -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold display-6">Our Competitions</h2>
+        <div class="row g-4">
+            {{ range $.Site.Data.competitions.competitions }}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm hover-lift">
+                    <div class="card-body text-center">
+                        <i class="bi bi-{{ .icon }} text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3 fw-bold">{{ .name }}</h5>
+                        <p class="card-text small text-muted">{{ .full_name }}</p>
+                        <a href="/competitions/{{ .id }}/" class="btn btn-outline-primary btn-sm">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</section>
+
+<!-- Need Help Organizing Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-6 fw-bold mb-4">Need Help Organizing a Competition?</h2>
+                <p class="lead mb-4">WCCOMPS shares our expertise and resources with other competition organizers. We provide consultation, infrastructure guidance, scenario development support, and best practices documentation to help you run successful cybersecurity events.</p>
+                <a href="/about/#organize-help" class="btn btn-light btn-lg">Learn How We Can Help</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-people-fill text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="card-title fw-bold">Volunteer</h5>
+                        <p class="card-text flex-grow-1">Join our team of dedicated volunteers. Share your expertise, mentor students, and help shape the future of cybersecurity education.</p>
+                        <a href="/volunteer/" class="btn btn-primary mt-auto">Get Involved</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-briefcase-fill text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="card-title fw-bold">Sponsor</h5>
+                        <p class="card-text flex-grow-1">Support the next generation of cybersecurity talent. Gain visibility, access to top students, and help address the industry skills gap.</p>
+                        <a href="/sponsor/" class="btn btn-primary mt-auto">Become a Sponsor</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-book-fill text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <h5 class="card-title fw-bold">Resources</h5>
+                        <p class="card-text flex-grow-1">Access our open-source projects, archived scenarios, training materials, and competition documentation to enhance your security education.</p>
+                        <a href="/resources/" class="btn btn-primary mt-auto">Explore Resources</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{ end }}

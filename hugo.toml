@@ -1,0 +1,19 @@
+baseURL = "https://wccomps.org/"
+languageCode = "en-us"
+title = "WCCOMPS - Western Coalition of Competitions"
+
+ignoreLogs = ['warning-goldmark-raw-html']
+
+[params]
+  description = "Western Coalition of Competitions - Organizing premier cybersecurity competitions including WRCCDC, PRCCDC, CIRCUS, and HackerCamp"
+  author = "WCCOMPS"
+  email = "info@wccomps.org"
+  github = "https://github.com/wrccdc-org"
+  archive = "https://archive.wccomps.org"
+  
+  # Homepage settings
+  enable_carousel = true  # Set to false to use simple hero instead
+
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]

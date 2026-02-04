@@ -1,0 +1,93 @@
+{{ define "main" }}
+<div class="container my-5">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-4">Event Schedule</h1>
+            <p class="lead">Stay up to date with all WCCOMPS competitions, workshops, and training events.</p>
+        </div>
+    </div>
+
+    <!-- Event Type Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group" aria-label="Event filter">
+                <input type="radio" class="btn-check" name="eventFilter" id="filterAll" checked>
+                <label class="btn btn-outline-primary" for="filterAll" onclick="filterEvents('all')">All Events</label>
+                
+                <input type="radio" class="btn-check" name="eventFilter" id="filterComp">
+                <label class="btn btn-outline-primary" for="filterComp" onclick="filterEvents('competition')">Competitions</label>
+                
+                <input type="radio" class="btn-check" name="eventFilter" id="filterWork">
+                <label class="btn btn-outline-primary" for="filterWork" onclick="filterEvents('workshop')">Workshops</label>
+                
+                <input type="radio" class="btn-check" name="eventFilter" id="filterTrain">
+                <label class="btn btn-outline-primary" for="filterTrain" onclick="filterEvents('training')">Training</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline View -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            {{ range $.Site.Data.schedule.events }}
+            {{ $startDate := time.Format "2006-01-02" .start_time }}
+            {{ $endDate := time.Format "2006-01-02" .end_time }}
+            {{ $displayDate := time.Format "Jan 2, 2006" .start_time }}
+            {{ $startTime := time.Format "3:04 PM" .start_time }}
+            {{ $endTime := time.Format "3:04 PM" .end_time }}
+            
+            <div class="event-item mb-4 p-4 border rounded event-type-{{ .event_type }}" data-event-type="{{ .event_type }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="event-date">
+                            <div class="badge bg-primary mb-2">{{ .event_type }}</div>
+                            <h5 class="fw-bold mb-1">{{ $displayDate }}</h5>
+                            {{ if ne $startDate $endDate }}
+                            <p class="text-muted small mb-0">Multi-day event</p>
+                            {{ else }}
+                            <p class="text-muted small mb-0">{{ $startTime }} - {{ $endTime }}</p>
+                            {{ end }}
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <h4 class="fw-bold mb-2">{{ .title }}</h4>
+                        <p class="mb-3">{{ .description }}</p>
+                        <a href="{{ .url }}" class="btn btn-sm btn-outline-primary">
+                            Learn More <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+
+    <!-- Calendar Integration Info -->
+    <div class="row mt-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-calendar-plus"></i> Add to Your Calendar</h5>
+                    <p class="card-text">Want to stay updated? Subscribe to our calendar feed or download individual events.</p>
+                    <button class="btn btn-primary" onclick="alert('iCal feed functionality coming soon!')">
+                        <i class="bi bi-download"></i> Subscribe to Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterEvents(type) {
+    const events = document.querySelectorAll('.event-item');
+    events.forEach(event => {
+        if (type === 'all' || event.dataset.eventType === type) {
+            event.style.display = 'block';
+        } else {
+            event.style.display = 'none';
+        }
+    });
+}
+</script>
+{{ end }}

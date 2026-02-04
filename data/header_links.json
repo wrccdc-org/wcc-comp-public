@@ -1,0 +1,34 @@
+{
+  "main": [
+    {
+      "name": "About Us",
+      "url": "/about/",
+      "weight": 1
+    },
+    {
+      "name": "Competitions",
+      "url": "/competitions/",
+      "weight": 2
+    },
+    {
+      "name": "Sponsor Us",
+      "url": "/sponsor/",
+      "weight": 3
+    },
+    {
+      "name": "Volunteer",
+      "url": "/volunteer/",
+      "weight": 4
+    },
+    {
+      "name": "Resources",
+      "url": "/resources/",
+      "weight": 5
+    },
+    {
+      "name": "Schedule",
+      "url": "/schedule/",
+      "weight": 6
+    }
+  ]
+}

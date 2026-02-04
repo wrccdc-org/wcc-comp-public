@@ -1,0 +1,20 @@
+{{ define "main" }}
+<div class="container my-5">
+    <h1 class="display-4 fw-bold mb-4">{{ .Title }}</h1>
+    <div class="row g-4">
+        {{ range .Pages }}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ .Title }}</h5>
+                    {{ if .Description }}
+                    <p class="card-text">{{ .Description }}</p>
+                    {{ end }}
+                    <a href="{{ .Permalink }}" class="btn btn-primary">Read More</a>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

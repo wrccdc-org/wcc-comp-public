@@ -1,0 +1,60 @@
+{
+  "events": [
+    {
+      "start_time": "2025-02-08T09:00:00",
+      "end_time": "2025-02-08T17:00:00",
+      "title": "WRCCDC Qualifier 2025",
+      "description": "Online qualifier round for the Western Regional CCDC. Top 8 teams advance to the regional competition.",
+      "url": "/competitions/wrccdc/",
+      "event_type": "competition"
+    },
+    {
+      "start_time": "2025-02-15T09:00:00",
+      "end_time": "2025-02-15T17:00:00",
+      "title": "PRCCDC Qualifier 2025",
+      "description": "Qualifier round for the Pacific Rim CCDC covering Alaska, Hawaii, and Pacific territories.",
+      "url": "/competitions/prccdc/",
+      "event_type": "competition"
+    },
+    {
+      "start_time": "2025-03-21T08:00:00",
+      "end_time": "2025-03-23T17:00:00",
+      "title": "PRCCDC Regional 2025",
+      "description": "Three-day regional championship for the Pacific Rim region. Winner advances to nationals.",
+      "url": "/competitions/prccdc/",
+      "event_type": "competition"
+    },
+    {
+      "start_time": "2025-03-28T08:00:00",
+      "end_time": "2025-03-30T17:00:00",
+      "title": "WRCCDC Regional 2025",
+      "description": "Three-day regional championship at Coastline Community College. Winner advances to nationals.",
+      "url": "/competitions/wrccdc/",
+      "event_type": "competition"
+    },
+    {
+      "start_time": "2025-04-01T18:00:00",
+      "end_time": "2025-04-01T20:00:00",
+      "title": "Volunteer Training: Red Team Basics",
+      "description": "Training session for new red team volunteers. Learn the fundamentals of ethical hacking and competition rules.",
+      "url": "/volunteer/",
+      "event_type": "training"
+    },
+    {
+      "start_time": "2025-04-15T18:00:00",
+      "end_time": "2025-04-15T20:00:00",
+      "title": "Student Workshop: Network Defense Fundamentals",
+      "description": "Free workshop for students covering network security basics and CCDC preparation.",
+      "url": "/resources/",
+      "event_type": "workshop"
+    },
+    {
+      "start_time": "2025-07-01T09:00:00",
+      "end_time": "2025-07-31T17:00:00",
+      "title": "HackerCamp 2025",
+      "description": "Month-long intensive summer cybersecurity training program for students.",
+      "url": "/competitions/hackercamp/",
+      "event_type": "camp"
+    }
+  ]
+}
