@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WRCCDC Audit Analysis Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2333;
+  --bg-hover: #21283a;
+  --border: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-blue: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-red: #f85149;
+  --accent-orange: #d29922;
+  --accent-purple: #bc8cff;
+  --accent-cyan: #39d2c0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.header {
+  background: linear-gradient(135deg, #1a1e2e 0%, #0d1117 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 2rem;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header .subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.controls label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-right: 0.3rem;
+}
+
+.controls select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.controls select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+  color: var(--accent-cyan);
+}
+
+/* Summary Cards */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover {
+  border-color: var(--accent-blue);
+}
+
+.stat-card .value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  display: block;
+}
+
+.stat-card .label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.3rem;
+}
+
+.stat-card.green .value { color: var(--accent-green); }
+.stat-card.red .value { color: var(--accent-red); }
+.stat-card.orange .value { color: var(--accent-orange); }
+.stat-card.purple .value { color: var(--accent-purple); }
+.stat-card.cyan .value { color: var(--accent-cyan); }
+
+/* Chart containers */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem;
+}
+
+.chart-box.full {
+  grid-column: 1 / -1;
+}
+
+.chart-box h3 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+}
+
+.chart-box canvas {
+  max-height: 400px;
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.data-table th {
+  background: var(--bg-secondary);
+  color: var(--accent-cyan);
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.data-table th:hover {
+  background: var(--bg-hover);
+}
+
+.data-table th .sort-arrow {
+  margin-left: 0.3rem;
+  color: var(--text-muted);
+}
+
+.data-table td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Heatmap */
+.heatmap-container {
+  overflow-x: auto;
+}
+
+.heatmap-table {
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  width: 100%;
+}
+
+.heatmap-table th {
+  padding: 0.3rem 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.heatmap-table td {
+  padding: 0.25rem;
+  text-align: center;
+  min-width: 36px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.heatmap-table .team-label {
+  text-align: right;
+  padding-right: 0.6rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.footnote {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Block reasons table */
+.block-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.block-table th, .block-table td {
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.block-table th {
+  background: var(--bg-secondary);
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-nsfw { background: rgba(248,81,73,0.2); color: var(--accent-red); }
+.badge-malware { background: rgba(210,153,34,0.2); color: var(--accent-orange); }
+.badge-infrastructure { background: rgba(88,166,255,0.2); color: var(--accent-blue); }
+
+@media (max-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>WRCCDC 2026 Audit Analysis</h1>
+  <div class="subtitle">Western Regional Collegiate Cyber Defense Competition &mdash; AI Usage Dashboard</div>
+</div>
+
+<div class="controls">
+  <div>
+    <label for="teamFilter">Team:</label>
+    <select id="teamFilter">
+      <option value="all">All Teams</option>
+    </select>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 1. Executive Summary -->
+  <div class="section" id="summary-section">
+    <h2 class="section-title">Executive Summary</h2>
+    <div class="summary-grid" id="summaryCards"></div>
+    <div class="footnote" id="excludedNote"></div>
+  </div>
+
+  <!-- 2. Team Activity Overview -->
+  <div class="section">
+    <h2 class="section-title">Team Activity Overview</h2>
+    <div class="chart-box full">
+      <h3>Requests per Team (Successful vs Blocked)</h3>
+      <canvas id="teamActivityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 3. Timeline -->
+  <div class="section">
+    <h2 class="section-title">Activity Timeline</h2>
+    <div class="chart-box full">
+      <h3>Requests per 30-Minute Interval</h3>
+      <canvas id="timelineChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 4. Token Usage -->
+  <div class="section">
+    <h2 class="section-title">Token Usage</h2>
+    <div class="chart-box full">
+      <h3>Input vs Output Tokens per Team</h3>
+      <canvas id="tokenChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 5. Model Usage -->
+  <div class="section">
+    <h2 class="section-title">Model Usage</h2>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Overall Model Distribution</h3>
+        <canvas id="modelDoughnutChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Model Usage per Team</h3>
+        <canvas id="modelTeamChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Blocked Requests Analysis -->
+  <div class="section">
+    <h2 class="section-title">Blocked Requests Analysis</h2>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Blocked Requests by Team</h3>
+        <canvas id="blockedTeamChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Block Categories</h3>
+        <canvas id="blockedCategoryChart"></canvas>
+      </div>
+      <div class="chart-box full">
+        <h3>Block Reasons Breakdown</h3>
+        <div id="blockReasonsContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Topic Analysis -->
+  <div class="section">
+    <h2 class="section-title">Topic Analysis</h2>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Overall Topic Distribution</h3>
+        <canvas id="topicBarChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Topics per Team (Radar)</h3>
+        <canvas id="topicRadarChart"></canvas>
+      </div>
+      <div class="chart-box full">
+        <h3>Topic Heatmap by Team</h3>
+        <div id="topicHeatmapContainer"></div>
+      </div>
+      <div class="chart-box full">
+        <h3>Topic Breakdown per Team (Stacked)</h3>
+        <canvas id="topicStackedChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7b. Detailed Topic Deep Dive -->
+  <div class="section">
+    <h2 class="section-title">Topic Deep Dive</h2>
+    <div class="controls" style="background:transparent;border:none;padding:0.5rem 0;justify-content:flex-start;">
+      <div>
+        <label for="categoryFilter">Category:</label>
+        <select id="categoryFilter"></select>
+      </div>
+      <div>
+        <label for="deepDiveTeamFilter">Team:</label>
+        <select id="deepDiveTeamFilter">
+          <option value="all">All Teams</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3 id="subtopicBarTitle">Subtopic Breakdown</h3>
+        <canvas id="subtopicBarChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Subtopics per Team (Selected Category)</h3>
+        <canvas id="subtopicTeamChart"></canvas>
+      </div>
+      <div class="chart-box full heatmap-container">
+        <h3>All Categories &mdash; Subtopic Heatmap</h3>
+        <div id="detailedTopicHeatmapContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7c. Agent / Tool Usage Analysis -->
+  <div class="section">
+    <h2 class="section-title">Agent &amp; Tool Usage</h2>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Agentic vs Chat Requests per Team</h3>
+        <canvas id="agentVsChatChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Conversation Depth (Avg Messages per Request)</h3>
+        <canvas id="convDepthChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Overall Tool Usage Distribution</h3>
+        <canvas id="toolDoughnutChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Tool Calls per Team (Top 8 Tools)</h3>
+        <canvas id="toolTeamChart"></canvas>
+      </div>
+      <div class="chart-box full">
+        <h3>Tool Usage Heatmap by Team</h3>
+        <div id="toolHeatmapContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Response Time Analysis -->
+  <div class="section">
+    <h2 class="section-title">Response Time Analysis</h2>
+    <div class="chart-box full">
+      <h3>Average, Median, and P95 Response Times (ms)</h3>
+      <canvas id="responseTimeChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 9. Team Deep-Dive Table -->
+  <div class="section">
+    <h2 class="section-title">Team Deep-Dive</h2>
+    <div class="chart-box full" style="overflow-x:auto;">
+      <table class="data-table" id="teamTable">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 10. Activity Heatmap -->
+  <div class="section">
+    <h2 class="section-title">Activity Heatmap</h2>
+    <div class="chart-box full heatmap-container">
+      <h3>Requests per Hour by Team</h3>
+      <div id="heatmapContainer"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {"executive_summary": {"total_requests": 6204, "total_tokens": 6137641, "total_input_tokens": 4710627, "total_output_tokens": 1427014, "blocked_count": 102, "blocked_rate": 1.64, "num_active_teams": 12, "active_teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "time_start": "2026-02-07 01:08 PST", "time_end": "2026-02-07 17:34 PST", "avg_duration_ms": 4544, "p95_duration_ms": 17143, "excluded_info": "Excluded: Test (1 req), Team27 (1 req)"}, "team_activity": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "total": [904, 848, 836, 265, 759, 266, 244, 707, 110, 278, 983, 4], "blocked": [4, 15, 12, 1, 3, 43, 0, 17, 2, 1, 3, 1], "successful": [900, 833, 824, 264, 756, 223, 244, 690, 108, 277, 980, 3]}, "timeline": {"labels": ["02/07 01:00", "02/07 01:30", "02/07 02:00", "02/07 02:30", "02/07 03:00", "02/07 03:30", "02/07 04:00", "02/07 04:30", "02/07 05:00", "02/07 05:30", "02/07 06:00", "02/07 06:30", "02/07 07:00", "02/07 07:30", "02/07 08:00", "02/07 08:30", "02/07 09:00", "02/07 09:30", "02/07 10:00", "02/07 10:30", "02/07 11:00", "02/07 11:30", "02/07 12:00", "02/07 12:30", "02/07 13:00", "02/07 13:30", "02/07 14:00", "02/07 14:30", "02/07 15:00", "02/07 15:30", "02/07 16:00", "02/07 16:30", "02/07 17:00", "02/07 17:30"], "teams": {"Team01": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 63, 176, 0, 44, 65, 2, 405, 146, 0, 0], "Team02": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 57, 42, 162, 122, 32, 103, 204, 7, 0, 0, 0, 0, 112, 0, 0, 0], "Team04": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 0, 19, 21, 102, 75, 57, 52, 90, 100, 34, 121, 60, 61, 25, 15, 0, 0], "Team06": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 37, 1, 0, 19, 34, 24, 28, 0, 2, 0, 4, 0, 0, 0], "Team09": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 4, 33, 20, 165, 91, 384, 61, 0], "Team10": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 41, 8, 12, 0, 0, 15, 49, 25, 32, 0, 21, 19, 36, 2, 4, 0, 0], "Team13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 153, 90, 0, 0], "Team15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 27, 37, 6, 56, 18, 9, 30, 10, 4, 6, 2, 2, 62, 147, 50, 184, 42], "Team20": [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19, 12, 1, 4, 3, 0, 10, 0, 2, 2, 0, 3, 5, 10, 31, 0, 0, 0], "Team21": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 72, 114, 53, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0], "Team22": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 9, 262, 38, 55, 147, 106, 79, 87, 0, 0], "Team25": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 0]}, "aggregate": [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 22, 22, 89, 122, 201, 361, 289, 237, 506, 476, 607, 110, 279, 320, 442, 1049, 777, 248, 42]}, "token_usage": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "input": [511780, 707524, 552912, 187515, 554346, 384810, 121796, 776932, 63863, 165330, 668299, 15520], "output": [163790, 104675, 150496, 53327, 128596, 197157, 36975, 334758, 60529, 45438, 150217, 1056]}, "model_usage": {"models": ["claude-3-5-haiku-20241022", "claude-haiku-4-5-20251001", "claude-opus-4-6", "claude-sonnet-4-20250514", "claude-sonnet-4-5-20250929"], "model_labels": ["Haiku 3.5", "Haiku 4.5", "Opus 4.6", "Sonnet 4", "Sonnet 4.5"], "counts": [6, 3941, 315, 7, 1935], "per_team": {"Team01": [0, 598, 0, 1, 305], "Team02": [0, 589, 0, 1, 258], "Team04": [6, 480, 198, 1, 151], "Team06": [0, 159, 0, 0, 106], "Team09": [0, 590, 0, 1, 168], "Team10": [0, 85, 0, 0, 181], "Team13": [0, 179, 0, 2, 63], "Team15": [0, 350, 117, 1, 239], "Team20": [0, 44, 0, 0, 66], "Team21": [0, 174, 0, 0, 104], "Team22": [0, 691, 0, 0, 292], "Team25": [0, 2, 0, 0, 2]}}, "blocked_analysis": {"by_team": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "counts": [4, 15, 12, 1, 3, 43, 0, 17, 2, 1, 3, 1]}, "by_category": {"categories": ["nsfw", "infrastructure", "malware"], "counts": [85, 8, 9]}, "by_reason": [{"reason": "Blocked pattern detected: explicit", "count": 64}, {"reason": "Response contained blocked pattern: explicit", "count": 21}, {"reason": "Response contained blocked pattern: denial of service", "count": 8}, {"reason": "Response contained blocked pattern: reverse shell", "count": 8}, {"reason": "Blocked pattern detected: reverse shell", "count": 1}], "total": 102}, "topic_analysis": {"topics": ["Backup / Recovery", "DNS", "Database", "Docker / Containers", "Firewall / iptables", "Hardening", "Linux Admin", "Mail", "Monitoring / Logs", "Network Config", "Passwords / Auth", "SSH / Remote Access", "Scripting", "Web / HTTP", "Windows / AD"], "totals": [3504, 2328, 1365, 1782, 1391, 2002, 3786, 283, 3683, 1687, 2271, 2187, 2720, 3207, 1333], "per_team": {"Team01": [473, 242, 217, 265, 197, 344, 566, 17, 533, 254, 324, 535, 395, 413, 98], "Team02": [491, 280, 111, 45, 32, 209, 449, 17, 549, 132, 179, 20, 340, 413, 48], "Team04": [621, 429, 228, 355, 242, 316, 615, 8, 607, 271, 446, 664, 461, 552, 282], "Team06": [125, 116, 62, 82, 63, 71, 171, 0, 166, 71, 87, 23, 139, 112, 61], "Team09": [322, 149, 65, 98, 113, 147, 378, 9, 400, 168, 187, 205, 245, 304, 99], "Team10": [172, 180, 177, 153, 164, 187, 188, 112, 192, 170, 200, 173, 155, 178, 154], "Team13": [118, 68, 2, 63, 76, 67, 129, 20, 145, 61, 93, 105, 83, 98, 0], "Team15": [412, 331, 156, 231, 290, 220, 410, 92, 292, 208, 189, 122, 384, 408, 272], "Team20": [61, 64, 54, 25, 32, 61, 68, 0, 64, 59, 58, 48, 66, 58, 25], "Team21": [157, 119, 94, 176, 36, 85, 165, 4, 161, 76, 141, 0, 78, 182, 59], "Team22": [552, 348, 197, 289, 146, 293, 645, 4, 572, 217, 365, 292, 372, 489, 235], "Team25": [0, 2, 2, 0, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 0]}}, "response_times": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "avg": [3279, 2806, 4285, 4888, 3603, 15363, 3354, 7499, 11091, 3713, 3305, 3613], "median": [820, 867, 1107, 1109, 758, 11041, 726, 3074, 6670, 887, 805, 747], "p95": [10861, 10717, 15993, 16737, 15531, 49545, 15539, 31312, 38659, 12689, 11846, 9360], "min": [425, 397, 157, 434, 403, 484, 448, 451, 461, 439, 401, 733], "max": [136492, 22238, 96429, 31547, 116397, 97749, 36021, 115961, 58527, 33613, 112464, 9360], "count": [900, 833, 824, 264, 756, 223, 244, 690, 108, 277, 980, 3]}, "team_details": [{"team": "Team01", "total_requests": 904, "blocked": 4, "blocked_rate": 0.4, "input_tokens": 511780, "output_tokens": 163790, "total_tokens": 675570, "avg_duration_ms": 3279, "median_duration_ms": 820, "p95_duration_ms": 10861, "top_model": "Haiku 4.5", "first_request": "02/07 08:35", "last_request": "02/07 16:58", "models_used": 3}, {"team": "Team02", "total_requests": 848, "blocked": 15, "blocked_rate": 1.8, "input_tokens": 707524, "output_tokens": 104675, "total_tokens": 812199, "avg_duration_ms": 2806, "median_duration_ms": 867, "p95_duration_ms": 10717, "top_model": "Haiku 4.5", "first_request": "02/07 09:57", "last_request": "02/07 16:28", "models_used": 3}, {"team": "Team04", "total_requests": 836, "blocked": 12, "blocked_rate": 1.4, "input_tokens": 552912, "output_tokens": 150496, "total_tokens": 703408, "avg_duration_ms": 4285, "median_duration_ms": 1107, "p95_duration_ms": 15993, "top_model": "Haiku 4.5", "first_request": "02/07 08:26", "last_request": "02/07 16:47", "models_used": 5}, {"team": "Team06", "total_requests": 265, "blocked": 1, "blocked_rate": 0.4, "input_tokens": 187515, "output_tokens": 53327, "total_tokens": 240842, "avg_duration_ms": 4888, "median_duration_ms": 1109, "p95_duration_ms": 16737, "top_model": "Haiku 4.5", "first_request": "02/07 10:43", "last_request": "02/07 16:25", "models_used": 2}, {"team": "Team09", "total_requests": 759, "blocked": 3, "blocked_rate": 0.4, "input_tokens": 554346, "output_tokens": 128596, "total_tokens": 682942, "avg_duration_ms": 3603, "median_duration_ms": 758, "p95_duration_ms": 15531, "top_model": "Haiku 4.5", "first_request": "02/07 11:27", "last_request": "02/07 17:16", "models_used": 3}, {"team": "Team10", "total_requests": 266, "blocked": 43, "blocked_rate": 16.2, "input_tokens": 384810, "output_tokens": 197157, "total_tokens": 581967, "avg_duration_ms": 15363, "median_duration_ms": 11041, "p95_duration_ms": 49545, "top_model": "Sonnet 4.5", "first_request": "02/07 08:57", "last_request": "02/07 16:31", "models_used": 2}, {"team": "Team13", "total_requests": 244, "blocked": 0, "blocked_rate": 0.0, "input_tokens": 121796, "output_tokens": 36975, "total_tokens": 158771, "avg_duration_ms": 3354, "median_duration_ms": 726, "p95_duration_ms": 15539, "top_model": "Haiku 4.5", "first_request": "02/07 11:34", "last_request": "02/07 16:48", "models_used": 3}, {"team": "Team15", "total_requests": 707, "blocked": 17, "blocked_rate": 2.4, "input_tokens": 776932, "output_tokens": 334758, "total_tokens": 1111690, "avg_duration_ms": 7499, "median_duration_ms": 3074, "p95_duration_ms": 31312, "top_model": "Haiku 4.5", "first_request": "02/07 08:41", "last_request": "02/07 17:34", "models_used": 4}, {"team": "Team20", "total_requests": 110, "blocked": 2, "blocked_rate": 1.8, "input_tokens": 63863, "output_tokens": 60529, "total_tokens": 124392, "avg_duration_ms": 11091, "median_duration_ms": 6670, "p95_duration_ms": 38659, "top_model": "Sonnet 4.5", "first_request": "02/07 01:08", "last_request": "02/07 16:13", "models_used": 2}, {"team": "Team21", "total_requests": 278, "blocked": 1, "blocked_rate": 0.4, "input_tokens": 165330, "output_tokens": 45438, "total_tokens": 210768, "avg_duration_ms": 3713, "median_duration_ms": 887, "p95_duration_ms": 12689, "top_model": "Haiku 4.5", "first_request": "02/07 11:48", "last_request": "02/07 13:23", "models_used": 2}, {"team": "Team22", "total_requests": 983, "blocked": 3, "blocked_rate": 0.3, "input_tokens": 668299, "output_tokens": 150217, "total_tokens": 818516, "avg_duration_ms": 3305, "median_duration_ms": 805, "p95_duration_ms": 11846, "top_model": "Haiku 4.5", "first_request": "02/07 12:32", "last_request": "02/07 16:51", "models_used": 2}, {"team": "Team25", "total_requests": 4, "blocked": 1, "blocked_rate": 25.0, "input_tokens": 15520, "output_tokens": 1056, "total_tokens": 16576, "avg_duration_ms": 3613, "median_duration_ms": 747, "p95_duration_ms": 9360, "top_model": "Haiku 4.5", "first_request": "02/07 16:59", "last_request": "02/07 17:00", "models_used": 2}], "heatmap": {"hours": ["02/07 01:00", "02/07 02:00", "02/07 03:00", "02/07 04:00", "02/07 05:00", "02/07 06:00", "02/07 07:00", "02/07 08:00", "02/07 09:00", "02/07 10:00", "02/07 11:00", "02/07 12:00", "02/07 13:00", "02/07 14:00", "02/07 15:00", "02/07 16:00", "02/07 17:00"], "teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "data": {"Team01": [0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 239, 44, 67, 551, 0], "Team02": [0, 0, 0, 0, 0, 0, 0, 0, 7, 99, 284, 135, 211, 0, 0, 112, 0], "Team04": [0, 0, 0, 0, 0, 0, 0, 1, 3, 40, 177, 109, 190, 155, 121, 40, 0], "Team06": [0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 38, 19, 58, 28, 2, 4, 0], "Team09": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 37, 185, 475, 61], "Team10": [0, 0, 0, 0, 0, 0, 0, 2, 41, 20, 0, 64, 57, 21, 55, 6, 0], "Team13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 243, 0], "Team15": [0, 0, 0, 0, 0, 0, 0, 15, 27, 43, 74, 39, 14, 8, 64, 197, 226], "Team20": [4, 0, 0, 0, 0, 0, 0, 4, 31, 5, 3, 10, 4, 3, 15, 31, 0], "Team21": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 72, 167, 39, 0, 0, 0, 0], "Team22": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 271, 93, 253, 166, 0], "Team25": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3]}}, "agent_usage": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "agentic": [293, 239, 313, 48, 124, 137, 60, 343, 28, 100, 283, 0], "chat": [611, 609, 523, 217, 635, 129, 184, 364, 82, 178, 700, 4], "tools": ["Bash", "Read", "Edit", "Write", "TaskUpdate", "TaskCreate", "Glob", "Task", "TaskOutput", "Grep", "AskUserQuestion", "WebFetch", "WebSearch", "EnterPlanMode", "ExitPlanMode", "TaskList"], "tool_totals": [54892, 5612, 2069, 1846, 1375, 1035, 798, 504, 246, 183, 178, 136, 128, 95, 61, 50], "tool_per_team": {"Team01": [13449, 411, 0, 287, 0, 0, 0, 177, 0, 30, 0, 0, 0, 0, 0, 0], "Team02": [8028, 1327, 368, 429, 0, 0, 262, 0, 180, 107, 0, 0, 0, 0, 0, 0], "Team04": [5137, 73, 0, 36, 0, 0, 123, 0, 0, 0, 65, 20, 0, 0, 0, 0], "Team06": [1161, 207, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "Team09": [4065, 44, 0, 0, 0, 0, 0, 6, 8, 0, 22, 0, 0, 0, 0, 0], "Team10": [0, 0, 0, 0, 0, 0, 0, 132, 0, 0, 0, 0, 68, 0, 0, 0], "Team13": [4894, 4, 3, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "Team15": [2130, 1986, 1172, 656, 622, 563, 91, 189, 0, 34, 14, 116, 7, 95, 61, 0], "Team20": [23, 15, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 53, 0, 0, 0], "Team21": [3091, 271, 75, 5, 0, 0, 32, 0, 0, 12, 0, 0, 0, 0, 0, 0], "Team22": [12914, 1274, 439, 379, 753, 472, 290, 0, 58, 0, 77, 0, 0, 0, 0, 50], "Team25": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "conv_depth": {"teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "avg": [26.5, 13.2, 24.2, 11.1, 4.3, 37.9, 14.1, 16.3, 12.7, 12.7, 15.7, 1.5], "median": [1, 1, 1, 1, 1, 11, 1, 5, 5, 1, 1, 1], "max": [273, 163, 171, 63, 55, 127, 103, 91, 57, 87, 121, 3]}}, "topic_heatmap": {"topics": ["Backup / Recovery", "DNS", "Database", "Docker / Containers", "Firewall / iptables", "Hardening", "Linux Admin", "Mail", "Monitoring / Logs", "Network Config", "Passwords / Auth", "SSH / Remote Access", "Scripting", "Web / HTTP", "Windows / AD"], "teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"], "data": {"Team01": [473, 242, 217, 265, 197, 344, 566, 17, 533, 254, 324, 535, 395, 413, 98], "Team02": [491, 280, 111, 45, 32, 209, 449, 17, 549, 132, 179, 20, 340, 413, 48], "Team04": [621, 429, 228, 355, 242, 316, 615, 8, 607, 271, 446, 664, 461, 552, 282], "Team06": [125, 116, 62, 82, 63, 71, 171, 0, 166, 71, 87, 23, 139, 112, 61], "Team09": [322, 149, 65, 98, 113, 147, 378, 9, 400, 168, 187, 205, 245, 304, 99], "Team10": [172, 180, 177, 153, 164, 187, 188, 112, 192, 170, 200, 173, 155, 178, 154], "Team13": [118, 68, 2, 63, 76, 67, 129, 20, 145, 61, 93, 105, 83, 98, 0], "Team15": [412, 331, 156, 231, 290, 220, 410, 92, 292, 208, 189, 122, 384, 408, 272], "Team20": [61, 64, 54, 25, 32, 61, 68, 0, 64, 59, 58, 48, 66, 58, 25], "Team21": [157, 119, 94, 176, 36, 85, 165, 4, 161, 76, 141, 0, 78, 182, 59], "Team22": [552, 348, 197, 289, 146, 293, 645, 4, 572, 217, 365, 292, 372, 489, 235], "Team25": [0, 2, 2, 0, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 0]}}, "detailed_topics": {"categories": ["Authentication", "Containers", "DNS", "Database", "Linux Admin", "Mail", "Monitoring", "Networking", "SSH", "Scripting", "Security", "Web Services", "Windows"], "subtopics": {"Authentication": ["Active Directory", "LDAP", "PAM", "Password changes", "Password policy", "sudo config"], "Containers": ["Docker", "Kubernetes"], "DNS": ["BIND/named", "DNS records", "DNS resolution", "DNSSEC"], "Database": ["DB backup", "MySQL/MariaDB", "PostgreSQL", "SQL queries"], "Linux Admin": ["File permissions", "Process mgmt", "User management", "apt/dpkg", "cron/scheduling", "sudo", "systemctl/systemd", "yum/dnf/rpm"], "Mail": ["Dovecot", "Postfix", "SMTP config"], "Monitoring": ["Log analysis", "Nagios/Zabbix", "System monitoring"], "Networking": ["IP/routing", "VLAN/switching", "firewalld", "iptables", "nftables", "nmap/scanning", "tcpdump/pcap", "ufw"], "SSH": ["SCP/SFTP", "SSH config", "SSH keys", "SSH tunneling"], "Scripting": ["Ansible", "Bash scripting", "Python"], "Security": ["CIS/hardening", "CVE/patches", "SELinux/AppArmor", "auditd", "fail2ban"], "Web Services": ["Apache", "Nginx", "PHP", "SSL/TLS", "WordPress"], "Windows": ["AD Users/Groups", "Group Policy", "PowerShell", "Registry", "Windows Defender", "Windows Services"]}, "totals": {"Authentication": {"Active Directory": 733, "LDAP": 670, "PAM": 533, "Password changes": 537, "Password policy": 97, "sudo config": 855}, "Containers": {"Docker": 493, "Kubernetes": 893}, "DNS": {"BIND/named": 228, "DNS records": 83, "DNS resolution": 462, "DNSSEC": 134}, "Database": {"DB backup": 133, "MySQL/MariaDB": 743, "PostgreSQL": 311, "SQL queries": 429}, "Linux Admin": {"File permissions": 564, "Process mgmt": 2390, "User management": 296, "apt/dpkg": 458, "cron/scheduling": 691, "sudo": 855, "systemctl/systemd": 1551, "yum/dnf/rpm": 423}, "Mail": {"Dovecot": 0, "Postfix": 1, "SMTP config": 183}, "Monitoring": {"Log analysis": 784, "Nagios/Zabbix": 19, "System monitoring": 627}, "Networking": {"IP/routing": 595, "VLAN/switching": 3, "firewalld": 176, "iptables": 478, "nftables": 71, "nmap/scanning": 1028, "tcpdump/pcap": 326, "ufw": 173}, "SSH": {"SCP/SFTP": 262, "SSH config": 634, "SSH keys": 279, "SSH tunneling": 226}, "Scripting": {"Ansible": 29, "Bash scripting": 335, "Python": 1645}, "Security": {"CIS/hardening": 1188, "CVE/patches": 599, "SELinux/AppArmor": 329, "auditd": 298, "fail2ban": 296}, "Web Services": {"Apache": 681, "Nginx": 630, "PHP": 765, "SSL/TLS": 729, "WordPress": 424}, "Windows": {"AD Users/Groups": 207, "Group Policy": 136, "PowerShell": 350, "Registry": 663, "Windows Defender": 55, "Windows Services": 60}}, "per_team": {"Team01": {"Authentication": {"Active Directory": 95, "LDAP": 71, "PAM": 63, "Password changes": 80, "Password policy": 2, "sudo config": 36}, "Containers": {"Docker": 35, "Kubernetes": 30}, "DNS": {"BIND/named": 4, "DNS records": 0, "DNS resolution": 40, "DNSSEC": 0}, "Database": {"DB backup": 1, "MySQL/MariaDB": 201, "PostgreSQL": 0, "SQL queries": 41}, "Linux Admin": {"File permissions": 100, "Process mgmt": 311, "User management": 18, "apt/dpkg": 17, "cron/scheduling": 125, "sudo": 36, "systemctl/systemd": 278, "yum/dnf/rpm": 11}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 1}, "Monitoring": {"Log analysis": 84, "Nagios/Zabbix": 0, "System monitoring": 6}, "Networking": {"IP/routing": 52, "VLAN/switching": 0, "firewalld": 0, "iptables": 7, "nftables": 2, "nmap/scanning": 70, "tcpdump/pcap": 4, "ufw": 0}, "SSH": {"SCP/SFTP": 152, "SSH config": 60, "SSH keys": 14, "SSH tunneling": 89}, "Scripting": {"Ansible": 0, "Bash scripting": 10, "Python": 122}, "Security": {"CIS/hardening": 48, "CVE/patches": 143, "SELinux/AppArmor": 153, "auditd": 122, "fail2ban": 0}, "Web Services": {"Apache": 230, "Nginx": 10, "PHP": 233, "SSL/TLS": 22, "WordPress": 194}, "Windows": {"AD Users/Groups": 69, "Group Policy": 9, "PowerShell": 48, "Registry": 2, "Windows Defender": 0, "Windows Services": 32}}, "Team02": {"Authentication": {"Active Directory": 2, "LDAP": 13, "PAM": 2, "Password changes": 1, "Password policy": 0, "sudo config": 40}, "Containers": {"Docker": 0, "Kubernetes": 64}, "DNS": {"BIND/named": 6, "DNS records": 0, "DNS resolution": 0, "DNSSEC": 0}, "Database": {"DB backup": 1, "MySQL/MariaDB": 0, "PostgreSQL": 1, "SQL queries": 12}, "Linux Admin": {"File permissions": 19, "Process mgmt": 300, "User management": 2, "apt/dpkg": 32, "cron/scheduling": 19, "sudo": 40, "systemctl/systemd": 174, "yum/dnf/rpm": 0}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 3}, "Monitoring": {"Log analysis": 58, "Nagios/Zabbix": 0, "System monitoring": 95}, "Networking": {"IP/routing": 14, "VLAN/switching": 0, "firewalld": 0, "iptables": 0, "nftables": 0, "nmap/scanning": 7, "tcpdump/pcap": 0, "ufw": 2}, "SSH": {"SCP/SFTP": 0, "SSH config": 5, "SSH keys": 0, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 1, "Python": 256}, "Security": {"CIS/hardening": 104, "CVE/patches": 14, "SELinux/AppArmor": 3, "auditd": 12, "fail2ban": 0}, "Web Services": {"Apache": 2, "Nginx": 51, "PHP": 0, "SSL/TLS": 50, "WordPress": 0}, "Windows": {"AD Users/Groups": 0, "Group Policy": 0, "PowerShell": 1, "Registry": 41, "Windows Defender": 0, "Windows Services": 0}}, "Team04": {"Authentication": {"Active Directory": 200, "LDAP": 70, "PAM": 199, "Password changes": 121, "Password policy": 0, "sudo config": 164}, "Containers": {"Docker": 17, "Kubernetes": 362}, "DNS": {"BIND/named": 4, "DNS records": 0, "DNS resolution": 281, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 2, "PostgreSQL": 76, "SQL queries": 36}, "Linux Admin": {"File permissions": 42, "Process mgmt": 369, "User management": 40, "apt/dpkg": 16, "cron/scheduling": 184, "sudo": 164, "systemctl/systemd": 297, "yum/dnf/rpm": 139}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 0}, "Monitoring": {"Log analysis": 215, "Nagios/Zabbix": 0, "System monitoring": 130}, "Networking": {"IP/routing": 16, "VLAN/switching": 0, "firewalld": 0, "iptables": 134, "nftables": 0, "nmap/scanning": 448, "tcpdump/pcap": 5, "ufw": 18}, "SSH": {"SCP/SFTP": 68, "SSH config": 196, "SSH keys": 1, "SSH tunneling": 2}, "Scripting": {"Ansible": 18, "Bash scripting": 128, "Python": 265}, "Security": {"CIS/hardening": 323, "CVE/patches": 18, "SELinux/AppArmor": 4, "auditd": 1, "fail2ban": 18}, "Web Services": {"Apache": 49, "Nginx": 110, "PHP": 34, "SSL/TLS": 224, "WordPress": 41}, "Windows": {"AD Users/Groups": 22, "Group Policy": 18, "PowerShell": 12, "Registry": 274, "Windows Defender": 18, "Windows Services": 0}}, "Team06": {"Authentication": {"Active Directory": 56, "LDAP": 62, "PAM": 6, "Password changes": 5, "Password policy": 0, "sudo config": 61}, "Containers": {"Docker": 56, "Kubernetes": 19}, "DNS": {"BIND/named": 0, "DNS records": 0, "DNS resolution": 49, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 61, "PostgreSQL": 54, "SQL queries": 54}, "Linux Admin": {"File permissions": 62, "Process mgmt": 139, "User management": 5, "apt/dpkg": 57, "cron/scheduling": 30, "sudo": 61, "systemctl/systemd": 119, "yum/dnf/rpm": 53}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 1}, "Monitoring": {"Log analysis": 33, "Nagios/Zabbix": 19, "System monitoring": 45}, "Networking": {"IP/routing": 33, "VLAN/switching": 0, "firewalld": 0, "iptables": 30, "nftables": 0, "nmap/scanning": 57, "tcpdump/pcap": 30, "ufw": 0}, "SSH": {"SCP/SFTP": 1, "SSH config": 10, "SSH keys": 3, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 0, "Python": 60}, "Security": {"CIS/hardening": 82, "CVE/patches": 1, "SELinux/AppArmor": 59, "auditd": 79, "fail2ban": 0}, "Web Services": {"Apache": 18, "Nginx": 0, "PHP": 59, "SSL/TLS": 45, "WordPress": 0}, "Windows": {"AD Users/Groups": 0, "Group Policy": 0, "PowerShell": 42, "Registry": 1, "Windows Defender": 24, "Windows Services": 0}}, "Team09": {"Authentication": {"Active Directory": 106, "LDAP": 8, "PAM": 26, "Password changes": 34, "Password policy": 0, "sudo config": 102}, "Containers": {"Docker": 5, "Kubernetes": 49}, "DNS": {"BIND/named": 21, "DNS records": 6, "DNS resolution": 22, "DNSSEC": 0}, "Database": {"DB backup": 1, "MySQL/MariaDB": 12, "PostgreSQL": 2, "SQL queries": 2}, "Linux Admin": {"File permissions": 36, "Process mgmt": 210, "User management": 20, "apt/dpkg": 27, "cron/scheduling": 81, "sudo": 102, "systemctl/systemd": 103, "yum/dnf/rpm": 17}, "Mail": {"Dovecot": 0, "Postfix": 1, "SMTP config": 3}, "Monitoring": {"Log analysis": 100, "Nagios/Zabbix": 0, "System monitoring": 9}, "Networking": {"IP/routing": 129, "VLAN/switching": 0, "firewalld": 1, "iptables": 27, "nftables": 22, "nmap/scanning": 107, "tcpdump/pcap": 1, "ufw": 0}, "SSH": {"SCP/SFTP": 37, "SSH config": 56, "SSH keys": 35, "SSH tunneling": 0}, "Scripting": {"Ansible": 11, "Bash scripting": 2, "Python": 184}, "Security": {"CIS/hardening": 57, "CVE/patches": 15, "SELinux/AppArmor": 5, "auditd": 6, "fail2ban": 28}, "Web Services": {"Apache": 24, "Nginx": 18, "PHP": 36, "SSL/TLS": 47, "WordPress": 11}, "Windows": {"AD Users/Groups": 6, "Group Policy": 1, "PowerShell": 17, "Registry": 7, "Windows Defender": 0, "Windows Services": 11}}, "Team10": {"Authentication": {"Active Directory": 133, "LDAP": 113, "PAM": 137, "Password changes": 135, "Password policy": 95, "sudo config": 138}, "Containers": {"Docker": 126, "Kubernetes": 145}, "DNS": {"BIND/named": 126, "DNS records": 76, "DNS resolution": 6, "DNSSEC": 134}, "Database": {"DB backup": 130, "MySQL/MariaDB": 167, "PostgreSQL": 0, "SQL queries": 143}, "Linux Admin": {"File permissions": 126, "Process mgmt": 162, "User management": 121, "apt/dpkg": 140, "cron/scheduling": 122, "sudo": 138, "systemctl/systemd": 153, "yum/dnf/rpm": 145}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 133}, "Monitoring": {"Log analysis": 132, "Nagios/Zabbix": 0, "System monitoring": 151}, "Networking": {"IP/routing": 142, "VLAN/switching": 1, "firewalld": 124, "iptables": 132, "nftables": 0, "nmap/scanning": 132, "tcpdump/pcap": 124, "ufw": 67}, "SSH": {"SCP/SFTP": 2, "SSH config": 136, "SSH keys": 121, "SSH tunneling": 135}, "Scripting": {"Ansible": 0, "Bash scripting": 127, "Python": 136}, "Security": {"CIS/hardening": 140, "CVE/patches": 158, "SELinux/AppArmor": 76, "auditd": 0, "fail2ban": 134}, "Web Services": {"Apache": 152, "Nginx": 144, "PHP": 141, "SSL/TLS": 158, "WordPress": 126}, "Windows": {"AD Users/Groups": 13, "Group Policy": 105, "PowerShell": 14, "Registry": 145, "Windows Defender": 13, "Windows Services": 0}}, "Team13": {"Authentication": {"Active Directory": 0, "LDAP": 0, "PAM": 3, "Password changes": 47, "Password policy": 0, "sudo config": 73}, "Containers": {"Docker": 1, "Kubernetes": 0}, "DNS": {"BIND/named": 1, "DNS records": 0, "DNS resolution": 0, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 0, "PostgreSQL": 0, "SQL queries": 0}, "Linux Admin": {"File permissions": 29, "Process mgmt": 79, "User management": 3, "apt/dpkg": 60, "cron/scheduling": 63, "sudo": 73, "systemctl/systemd": 72, "yum/dnf/rpm": 0}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 0}, "Monitoring": {"Log analysis": 86, "Nagios/Zabbix": 0, "System monitoring": 55}, "Networking": {"IP/routing": 38, "VLAN/switching": 0, "firewalld": 0, "iptables": 58, "nftables": 19, "nmap/scanning": 46, "tcpdump/pcap": 0, "ufw": 0}, "SSH": {"SCP/SFTP": 1, "SSH config": 57, "SSH keys": 0, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 1, "Python": 39}, "Security": {"CIS/hardening": 57, "CVE/patches": 56, "SELinux/AppArmor": 1, "auditd": 58, "fail2ban": 84}, "Web Services": {"Apache": 60, "Nginx": 58, "PHP": 0, "SSL/TLS": 0, "WordPress": 0}, "Windows": {"AD Users/Groups": 0, "Group Policy": 0, "PowerShell": 1, "Registry": 0, "Windows Defender": 0, "Windows Services": 0}}, "Team15": {"Authentication": {"Active Directory": 17, "LDAP": 123, "PAM": 4, "Password changes": 47, "Password policy": 0, "sudo config": 133}, "Containers": {"Docker": 91, "Kubernetes": 35}, "DNS": {"BIND/named": 57, "DNS records": 0, "DNS resolution": 0, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 95, "PostgreSQL": 65, "SQL queries": 91}, "Linux Admin": {"File permissions": 48, "Process mgmt": 331, "User management": 55, "apt/dpkg": 67, "cron/scheduling": 0, "sudo": 133, "systemctl/systemd": 22, "yum/dnf/rpm": 27}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 41}, "Monitoring": {"Log analysis": 17, "Nagios/Zabbix": 0, "System monitoring": 59}, "Networking": {"IP/routing": 50, "VLAN/switching": 0, "firewalld": 0, "iptables": 49, "nftables": 28, "nmap/scanning": 60, "tcpdump/pcap": 160, "ufw": 0}, "SSH": {"SCP/SFTP": 0, "SSH config": 0, "SSH keys": 0, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 41, "Python": 199}, "Security": {"CIS/hardening": 34, "CVE/patches": 9, "SELinux/AppArmor": 0, "auditd": 5, "fail2ban": 0}, "Web Services": {"Apache": 69, "Nginx": 92, "PHP": 110, "SSL/TLS": 82, "WordPress": 27}, "Windows": {"AD Users/Groups": 51, "Group Policy": 1, "PowerShell": 86, "Registry": 52, "Windows Defender": 0, "Windows Services": 16}}, "Team20": {"Authentication": {"Active Directory": 0, "LDAP": 0, "PAM": 0, "Password changes": 34, "Password policy": 0, "sudo config": 49}, "Containers": {"Docker": 0, "Kubernetes": 28}, "DNS": {"BIND/named": 1, "DNS records": 0, "DNS resolution": 0, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 34, "PostgreSQL": 34, "SQL queries": 28}, "Linux Admin": {"File permissions": 36, "Process mgmt": 63, "User management": 27, "apt/dpkg": 30, "cron/scheduling": 27, "sudo": 49, "systemctl/systemd": 42, "yum/dnf/rpm": 28}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 0}, "Monitoring": {"Log analysis": 27, "Nagios/Zabbix": 0, "System monitoring": 42}, "Networking": {"IP/routing": 41, "VLAN/switching": 0, "firewalld": 16, "iptables": 25, "nftables": 0, "nmap/scanning": 41, "tcpdump/pcap": 0, "ufw": 30}, "SSH": {"SCP/SFTP": 0, "SSH config": 34, "SSH keys": 27, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 25, "Python": 42}, "Security": {"CIS/hardening": 44, "CVE/patches": 44, "SELinux/AppArmor": 25, "auditd": 15, "fail2ban": 30}, "Web Services": {"Apache": 24, "Nginx": 16, "PHP": 15, "SSL/TLS": 27, "WordPress": 25}, "Windows": {"AD Users/Groups": 0, "Group Policy": 0, "PowerShell": 25, "Registry": 0, "Windows Defender": 0, "Windows Services": 0}}, "Team21": {"Authentication": {"Active Directory": 59, "LDAP": 118, "PAM": 0, "Password changes": 0, "Password policy": 0, "sudo config": 0}, "Containers": {"Docker": 99, "Kubernetes": 0}, "DNS": {"BIND/named": 0, "DNS records": 0, "DNS resolution": 4, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 90, "PostgreSQL": 1, "SQL queries": 4}, "Linux Admin": {"File permissions": 43, "Process mgmt": 109, "User management": 0, "apt/dpkg": 0, "cron/scheduling": 0, "sudo": 0, "systemctl/systemd": 7, "yum/dnf/rpm": 1}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 1}, "Monitoring": {"Log analysis": 0, "Nagios/Zabbix": 0, "System monitoring": 3}, "Networking": {"IP/routing": 19, "VLAN/switching": 0, "firewalld": 3, "iptables": 9, "nftables": 0, "nmap/scanning": 0, "tcpdump/pcap": 0, "ufw": 19}, "SSH": {"SCP/SFTP": 0, "SSH config": 0, "SSH keys": 0, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 0, "Python": 41}, "Security": {"CIS/hardening": 35, "CVE/patches": 0, "SELinux/AppArmor": 0, "auditd": 0, "fail2ban": 0}, "Web Services": {"Apache": 2, "Nginx": 0, "PHP": 137, "SSL/TLS": 9, "WordPress": 0}, "Windows": {"AD Users/Groups": 4, "Group Policy": 0, "PowerShell": 79, "Registry": 0, "Windows Defender": 0, "Windows Services": 0}}, "Team22": {"Authentication": {"Active Directory": 65, "LDAP": 90, "PAM": 93, "Password changes": 33, "Password policy": 0, "sudo config": 59}, "Containers": {"Docker": 63, "Kubernetes": 161}, "DNS": {"BIND/named": 8, "DNS records": 1, "DNS resolution": 60, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 81, "PostgreSQL": 78, "SQL queries": 18}, "Linux Admin": {"File permissions": 23, "Process mgmt": 315, "User management": 5, "apt/dpkg": 12, "cron/scheduling": 40, "sudo": 59, "systemctl/systemd": 284, "yum/dnf/rpm": 2}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 0}, "Monitoring": {"Log analysis": 32, "Nagios/Zabbix": 0, "System monitoring": 30}, "Networking": {"IP/routing": 61, "VLAN/switching": 2, "firewalld": 32, "iptables": 7, "nftables": 0, "nmap/scanning": 60, "tcpdump/pcap": 2, "ufw": 37}, "SSH": {"SCP/SFTP": 1, "SSH config": 80, "SSH keys": 78, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 0, "Python": 301}, "Security": {"CIS/hardening": 264, "CVE/patches": 139, "SELinux/AppArmor": 3, "auditd": 0, "fail2ban": 2}, "Web Services": {"Apache": 51, "Nginx": 131, "PHP": 0, "SSL/TLS": 65, "WordPress": 0}, "Windows": {"AD Users/Groups": 42, "Group Policy": 2, "PowerShell": 25, "Registry": 141, "Windows Defender": 0, "Windows Services": 1}}, "Team25": {"Authentication": {"Active Directory": 0, "LDAP": 2, "PAM": 0, "Password changes": 0, "Password policy": 0, "sudo config": 0}, "Containers": {"Docker": 0, "Kubernetes": 0}, "DNS": {"BIND/named": 0, "DNS records": 0, "DNS resolution": 0, "DNSSEC": 0}, "Database": {"DB backup": 0, "MySQL/MariaDB": 0, "PostgreSQL": 0, "SQL queries": 0}, "Linux Admin": {"File permissions": 0, "Process mgmt": 2, "User management": 0, "apt/dpkg": 0, "cron/scheduling": 0, "sudo": 0, "systemctl/systemd": 0, "yum/dnf/rpm": 0}, "Mail": {"Dovecot": 0, "Postfix": 0, "SMTP config": 0}, "Monitoring": {"Log analysis": 0, "Nagios/Zabbix": 0, "System monitoring": 2}, "Networking": {"IP/routing": 0, "VLAN/switching": 0, "firewalld": 0, "iptables": 0, "nftables": 0, "nmap/scanning": 0, "tcpdump/pcap": 0, "ufw": 0}, "SSH": {"SCP/SFTP": 0, "SSH config": 0, "SSH keys": 0, "SSH tunneling": 0}, "Scripting": {"Ansible": 0, "Bash scripting": 0, "Python": 0}, "Security": {"CIS/hardening": 0, "CVE/patches": 2, "SELinux/AppArmor": 0, "auditd": 0, "fail2ban": 0}, "Web Services": {"Apache": 0, "Nginx": 0, "PHP": 0, "SSL/TLS": 0, "WordPress": 0}, "Windows": {"AD Users/Groups": 0, "Group Policy": 0, "PowerShell": 0, "Registry": 0, "Windows Defender": 0, "Windows Services": 0}}}, "teams": ["Team01", "Team02", "Team04", "Team06", "Team09", "Team10", "Team13", "Team15", "Team20", "Team21", "Team22", "Team25"]}};
+
+// ── Color Palette ──────────────────────────────────────────────────
+const TEAM_COLORS = {
+  'Team01': '#58a6ff', 'Team02': '#3fb950', 'Team04': '#f85149',
+  'Team06': '#d29922', 'Team09': '#bc8cff', 'Team10': '#39d2c0',
+  'Team13': '#f778ba', 'Team15': '#79c0ff', 'Team20': '#ffa657',
+  'Team21': '#7ee787', 'Team22': '#ff7b72', 'Team25': '#d2a8ff',
+};
+
+const MODEL_COLORS = ['#58a6ff', '#3fb950', '#f85149', '#d29922', '#bc8cff'];
+const CATEGORY_COLORS = { nsfw: '#f85149', malware: '#d29922', infrastructure: '#58a6ff' };
+
+function teamColor(team) {
+  return TEAM_COLORS[team] || '#8b949e';
+}
+
+function formatNum(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+function escText(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.textContent;
+}
+
+// Chart.js global config
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
+
+let charts = {};
+
+// ── 1. Executive Summary ───────────────────────────────────────────
+function renderSummary() {
+  const s = DATA.executive_summary;
+  const cards = [
+    { value: formatNum(s.total_requests), label: 'Total Requests', cls: '' },
+    { value: formatNum(s.total_tokens), label: 'Total Tokens', cls: 'cyan' },
+    { value: formatNum(s.total_input_tokens), label: 'Input Tokens', cls: '' },
+    { value: formatNum(s.total_output_tokens), label: 'Output Tokens', cls: '' },
+    { value: s.blocked_count + ' (' + s.blocked_rate + '%)', label: 'Blocked Requests', cls: 'red' },
+    { value: s.num_active_teams, label: 'Active Teams', cls: 'green' },
+    { value: s.avg_duration_ms + 'ms', label: 'Avg Response Time', cls: 'orange' },
+  ];
+
+  const grid = document.getElementById('summaryCards');
+  // Build cards using DOM methods
+  grid.replaceChildren();
+  cards.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'stat-card ' + c.cls;
+    const valSpan = document.createElement('span');
+    valSpan.className = 'value';
+    valSpan.textContent = c.value;
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'label';
+    labelSpan.textContent = c.label;
+    card.appendChild(valSpan);
+    card.appendChild(labelSpan);
+    grid.appendChild(card);
+  });
+
+  document.getElementById('excludedNote').textContent = s.excluded_info + ' | Time span: ' + s.time_start + ' to ' + s.time_end;
+}
+
+// ── 2. Team Activity ───────────────────────────────────────────────
+function renderTeamActivity() {
+  const d = DATA.team_activity;
+  const ctx = document.getElementById('teamActivityChart').getContext('2d');
+  if (charts.teamActivity) charts.teamActivity.destroy();
+  charts.teamActivity = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: d.teams,
+      datasets: [
+        {
+          label: 'Successful',
+          data: d.successful,
+          backgroundColor: 'rgba(63,185,80,0.7)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Blocked',
+          data: d.blocked,
+          backgroundColor: 'rgba(248,81,73,0.7)',
+          borderRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            afterBody: function(items) {
+              const idx = items[0].dataIndex;
+              const total = d.total[idx];
+              const blocked = d.blocked[idx];
+              return 'Total: ' + total + ' | Blocked: ' + blocked + ' (' + (blocked/total*100).toFixed(1) + '%)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      }
+    }
+  });
+}
+
+// ── 3. Timeline ────────────────────────────────────────────────────
+function renderTimeline(selectedTeam) {
+  const d = DATA.timeline;
+  const ctx = document.getElementById('timelineChart').getContext('2d');
+  if (charts.timeline) charts.timeline.destroy();
+
+  var datasets;
+  if (selectedTeam && selectedTeam !== 'all') {
+    datasets = [{
+      label: selectedTeam,
+      data: d.teams[selectedTeam] || [],
+      borderColor: teamColor(selectedTeam),
+      backgroundColor: teamColor(selectedTeam) + '33',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 2,
+    }];
+  } else {
+    datasets = [{
+      label: 'All Teams',
+      data: d.aggregate,
+      borderColor: '#58a6ff',
+      backgroundColor: 'rgba(88,166,255,0.15)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 2,
+    }];
+  }
+
+  charts.timeline = new Chart(ctx, {
+    type: 'line',
+    data: { labels: d.labels, datasets: datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 20 } },
+        y: { beginAtZero: true },
+      }
+    }
+  });
+}
+
+// ── 4. Token Usage ─────────────────────────────────────────────────
+function renderTokenUsage() {
+  const d = DATA.token_usage;
+  const ctx = document.getElementById('tokenChart').getContext('2d');
+  if (charts.tokenUsage) charts.tokenUsage.destroy();
+  charts.tokenUsage = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: d.teams,
+      datasets: [
+        {
+          label: 'Input Tokens',
+          data: d.input,
+          backgroundColor: 'rgba(88,166,255,0.7)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Output Tokens',
+          data: d.output,
+          backgroundColor: 'rgba(63,185,80,0.7)',
+          borderRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': ' + formatNum(ctx.raw); }
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: function(v) { return formatNum(v); } } },
+      }
+    }
+  });
+}
+
+// ── 5. Model Usage ─────────────────────────────────────────────────
+function renderModelUsage() {
+  const d = DATA.model_usage;
+  // Doughnut
+  const ctx1 = document.getElementById('modelDoughnutChart').getContext('2d');
+  if (charts.modelDoughnut) charts.modelDoughnut.destroy();
+  charts.modelDoughnut = new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: d.model_labels,
+      datasets: [{ data: d.counts, backgroundColor: MODEL_COLORS }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const total = ctx.dataset.data.reduce(function(a,b) { return a+b; }, 0);
+              return ctx.label + ': ' + ctx.raw + ' (' + (ctx.raw/total*100).toFixed(1) + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Per-team stacked bar
+  const ctx2 = document.getElementById('modelTeamChart').getContext('2d');
+  if (charts.modelTeam) charts.modelTeam.destroy();
+  const teams = DATA.team_activity.teams;
+  const datasets = d.models.map(function(model, idx) {
+    return {
+      label: d.model_labels[idx],
+      data: teams.map(function(t) { return d.per_team[t][idx]; }),
+      backgroundColor: MODEL_COLORS[idx % MODEL_COLORS.length],
+      borderRadius: 2,
+    };
+  });
+
+  charts.modelTeam = new Chart(ctx2, {
+    type: 'bar',
+    data: { labels: teams, datasets: datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      }
+    }
+  });
+}
+
+// ── 6. Blocked Requests ────────────────────────────────────────────
+function renderBlockedAnalysis() {
+  const d = DATA.blocked_analysis;
+
+  // By team
+  const ctx1 = document.getElementById('blockedTeamChart').getContext('2d');
+  if (charts.blockedTeam) charts.blockedTeam.destroy();
+  charts.blockedTeam = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: d.by_team.teams,
+      datasets: [{
+        label: 'Blocked Requests',
+        data: d.by_team.counts,
+        backgroundColor: 'rgba(248,81,73,0.7)',
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } },
+    }
+  });
+
+  // By category
+  const ctx2 = document.getElementById('blockedCategoryChart').getContext('2d');
+  if (charts.blockedCat) charts.blockedCat.destroy();
+  charts.blockedCat = new Chart(ctx2, {
+    type: 'pie',
+    data: {
+      labels: d.by_category.categories,
+      datasets: [{
+        data: d.by_category.counts,
+        backgroundColor: d.by_category.categories.map(function(c) { return CATEGORY_COLORS[c] || '#8b949e'; }),
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.label + ': ' + ctx.raw + ' (' + (ctx.raw/d.total*100).toFixed(1) + '%)'; }
+          }
+        }
+      }
+    }
+  });
+
+  // Reasons table - built with DOM methods
+  const container = document.getElementById('blockReasonsContainer');
+  container.replaceChildren();
+
+  const table = document.createElement('table');
+  table.className = 'block-table';
+
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  ['Reason', 'Category', 'Count'].forEach(function(text, i) {
+    const th = document.createElement('th');
+    th.textContent = text;
+    if (i === 2) th.style.textAlign = 'right';
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  d.by_reason.forEach(function(r) {
+    var cat = 'unknown';
+    if (r.reason.indexOf('explicit') !== -1) cat = 'nsfw';
+    else if (r.reason.indexOf('reverse shell') !== -1) cat = 'malware';
+    else if (r.reason.indexOf('denial of service') !== -1) cat = 'infrastructure';
+
+    const tr = document.createElement('tr');
+
+    const tdReason = document.createElement('td');
+    tdReason.textContent = r.reason;
+    tr.appendChild(tdReason);
+
+    const tdCat = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'badge badge-' + cat;
+    badge.textContent = cat;
+    tdCat.appendChild(badge);
+    tr.appendChild(tdCat);
+
+    const tdCount = document.createElement('td');
+    tdCount.style.textAlign = 'right';
+    tdCount.textContent = r.count;
+    tr.appendChild(tdCount);
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+// ── 7. Topic Analysis ──────────────────────────────────────────────
+function renderTopicAnalysis(selectedTeam) {
+  const d = DATA.topic_analysis;
+
+  // Sort topics by total count for bar chart
+  const indices = d.topics.map(function(_, i) { return i; }).sort(function(a, b) { return d.totals[b] - d.totals[a]; });
+  const sortedTopics = indices.map(function(i) { return d.topics[i]; });
+  const sortedTotals = indices.map(function(i) { return d.totals[i]; });
+
+  const ctx1 = document.getElementById('topicBarChart').getContext('2d');
+  if (charts.topicBar) charts.topicBar.destroy();
+
+  var barData;
+  if (selectedTeam && selectedTeam !== 'all') {
+    const teamData = d.per_team[selectedTeam] || d.totals.map(function() { return 0; });
+    barData = indices.map(function(i) { return teamData[i]; });
+  } else {
+    barData = sortedTotals;
+  }
+
+  charts.topicBar = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: sortedTopics,
+      datasets: [{
+        label: selectedTeam && selectedTeam !== 'all' ? selectedTeam : 'All Teams',
+        data: barData,
+        backgroundColor: 'rgba(57,210,192,0.6)',
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } },
+    }
+  });
+
+  // Radar chart - top 5 teams by request count
+  const ctx2 = document.getElementById('topicRadarChart').getContext('2d');
+  if (charts.topicRadar) charts.topicRadar.destroy();
+
+  const teamsByCount = DATA.team_activity.teams
+    .map(function(t) {
+      return { team: t, count: DATA.team_activity.total[DATA.team_activity.teams.indexOf(t)] };
+    })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 5);
+
+  // Use top 8 topics for radar readability
+  const topTopicIndices = indices.slice(0, 8);
+  const radarLabels = topTopicIndices.map(function(i) { return d.topics[i]; });
+
+  const radarDatasets = teamsByCount.map(function(tc) {
+    return {
+      label: tc.team,
+      data: topTopicIndices.map(function(i) { return d.per_team[tc.team][i]; }),
+      borderColor: teamColor(tc.team),
+      backgroundColor: teamColor(tc.team) + '22',
+      pointRadius: 3,
+    };
+  });
+
+  charts.topicRadar = new Chart(ctx2, {
+    type: 'radar',
+    data: { labels: radarLabels, datasets: radarDatasets },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          grid: { color: '#30363d' },
+          angleLines: { color: '#30363d' },
+          pointLabels: { color: '#8b949e', font: { size: 10 } },
+          ticks: { display: false },
+        }
+      },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+    }
+  });
+}
+
+// ── 8. Response Time ───────────────────────────────────────────────
+function renderResponseTimes() {
+  const d = DATA.response_times;
+  const ctx = document.getElementById('responseTimeChart').getContext('2d');
+  if (charts.responseTime) charts.responseTime.destroy();
+  charts.responseTime = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: d.teams,
+      datasets: [
+        {
+          label: 'Average',
+          data: d.avg,
+          backgroundColor: 'rgba(88,166,255,0.6)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Median',
+          data: d.median,
+          backgroundColor: 'rgba(63,185,80,0.6)',
+          borderRadius: 4,
+        },
+        {
+          label: 'P95',
+          data: d.p95,
+          backgroundColor: 'rgba(210,153,34,0.6)',
+          borderRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + 'ms'; }
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: function(v) { return formatNum(v) + 'ms'; } } },
+      }
+    }
+  });
+}
+
+// ── 9. Team Deep-Dive Table ────────────────────────────────────────
+function renderTeamTable() {
+  const details = DATA.team_details;
+  const columns = [
+    { key: 'team', label: 'Team', fmt: function(v) { return v; } },
+    { key: 'total_requests', label: 'Requests', fmt: function(v) { return v.toLocaleString(); }, cls: 'num' },
+    { key: 'blocked', label: 'Blocked', fmt: function(v) { return v; }, cls: 'num' },
+    { key: 'blocked_rate', label: 'Block %', fmt: function(v) { return v + '%'; }, cls: 'num' },
+    { key: 'total_tokens', label: 'Total Tokens', fmt: function(v) { return formatNum(v); }, cls: 'num' },
+    { key: 'input_tokens', label: 'Input Tok', fmt: function(v) { return formatNum(v); }, cls: 'num' },
+    { key: 'output_tokens', label: 'Output Tok', fmt: function(v) { return formatNum(v); }, cls: 'num' },
+    { key: 'avg_duration_ms', label: 'Avg ms', fmt: function(v) { return v.toLocaleString(); }, cls: 'num' },
+    { key: 'median_duration_ms', label: 'Med ms', fmt: function(v) { return v.toLocaleString(); }, cls: 'num' },
+    { key: 'p95_duration_ms', label: 'P95 ms', fmt: function(v) { return v.toLocaleString(); }, cls: 'num' },
+    { key: 'top_model', label: 'Top Model', fmt: function(v) { return v; } },
+    { key: 'models_used', label: 'Models', fmt: function(v) { return v; }, cls: 'num' },
+    { key: 'first_request', label: 'First Req', fmt: function(v) { return v; } },
+    { key: 'last_request', label: 'Last Req', fmt: function(v) { return v; } },
+  ];
+
+  const thead = document.querySelector('#teamTable thead tr');
+  thead.replaceChildren();
+  columns.forEach(function(c, i) {
+    const th = document.createElement('th');
+    th.dataset.col = i;
+    th.dataset.key = c.key;
+    th.textContent = c.label + ' ';
+    const arrow = document.createElement('span');
+    arrow.className = 'sort-arrow';
+    th.appendChild(arrow);
+    thead.appendChild(th);
+  });
+
+  var sortKey = 'total_requests';
+  var sortDir = -1;
+
+  function render() {
+    var sorted = details.slice().sort(function(a, b) {
+      var va = a[sortKey], vb = b[sortKey];
+      if (typeof va === 'string') return sortDir * va.localeCompare(vb);
+      return sortDir * (va - vb);
+    });
+
+    var tbody = document.querySelector('#teamTable tbody');
+    tbody.replaceChildren();
+    sorted.forEach(function(row) {
+      var tr = document.createElement('tr');
+      columns.forEach(function(c) {
+        var td = document.createElement('td');
+        if (c.cls) td.className = c.cls;
+        td.textContent = c.fmt(row[c.key]);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    // Update sort arrows
+    thead.querySelectorAll('.sort-arrow').forEach(function(el, i) {
+      el.textContent = columns[i].key === sortKey ? (sortDir === 1 ? ' \u25B2' : ' \u25BC') : '';
+    });
+  }
+
+  thead.querySelectorAll('th').forEach(function(th) {
+    th.addEventListener('click', function() {
+      var key = th.dataset.key;
+      if (sortKey === key) { sortDir *= -1; }
+      else { sortKey = key; sortDir = -1; }
+      render();
+    });
+  });
+
+  render();
+}
+
+// ── 10. Activity Heatmap ───────────────────────────────────────────
+function renderHeatmap() {
+  const d = DATA.heatmap;
+
+  // Find global max for color scaling
+  var maxVal = 0;
+  d.teams.forEach(function(team) {
+    d.data[team].forEach(function(v) {
+      if (v > maxVal) maxVal = v;
+    });
+  });
+
+  function heatColor(val) {
+    if (val === 0) return 'transparent';
+    var intensity = Math.min(val / maxVal, 1);
+    var r = Math.round(88 + (255 - 88) * intensity);
+    var g = Math.round(166 - 100 * intensity);
+    var b = Math.round(255 - 200 * intensity);
+    var a = 0.15 + 0.85 * intensity;
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  var container = document.getElementById('heatmapContainer');
+  container.replaceChildren();
+
+  var table = document.createElement('table');
+  table.className = 'heatmap-table';
+
+  // Header row
+  var thead = document.createElement('thead');
+  var headerRow = document.createElement('tr');
+  var emptyTh = document.createElement('th');
+  headerRow.appendChild(emptyTh);
+
+  d.hours.forEach(function(h) {
+    var parts = h.split(' ');
+    var th = document.createElement('th');
+    th.style.writingMode = 'vertical-lr';
+    th.style.transform = 'rotate(180deg)';
+    th.style.fontSize = '0.65rem';
+    th.textContent = parts[1];
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Body rows
+  var tbody = document.createElement('tbody');
+  d.teams.forEach(function(team) {
+    var tr = document.createElement('tr');
+    var labelTd = document.createElement('td');
+    labelTd.className = 'team-label';
+    labelTd.textContent = team;
+    tr.appendChild(labelTd);
+
+    d.data[team].forEach(function(v) {
+      var td = document.createElement('td');
+      td.style.background = heatColor(v);
+      td.style.color = v > 0 ? '#e6edf3' : 'transparent';
+      td.textContent = v > 0 ? v : '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+// ── 7b. Topic Heatmap ──────────────────────────────────────────────
+function renderTopicHeatmap() {
+  var d = DATA.topic_heatmap;
+  var container = document.getElementById('topicHeatmapContainer');
+  container.replaceChildren();
+
+  // Find max for color scaling
+  var maxVal = 0;
+  d.teams.forEach(function(team) {
+    d.data[team].forEach(function(v) {
+      if (v > maxVal) maxVal = v;
+    });
+  });
+
+  function topicHeatColor(val) {
+    if (val === 0) return 'transparent';
+    var intensity = Math.min(val / maxVal, 1);
+    var r = Math.round(57 + (188 - 57) * intensity);
+    var g = Math.round(210 - 70 * intensity);
+    var b = Math.round(192 - 60 * intensity);
+    var a = 0.15 + 0.85 * intensity;
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  var table = document.createElement('table');
+  table.className = 'heatmap-table';
+
+  var thead = document.createElement('thead');
+  var headerRow = document.createElement('tr');
+  var emptyTh = document.createElement('th');
+  headerRow.appendChild(emptyTh);
+  d.topics.forEach(function(topic) {
+    var th = document.createElement('th');
+    th.style.writingMode = 'vertical-lr';
+    th.style.transform = 'rotate(180deg)';
+    th.style.fontSize = '0.65rem';
+    th.style.maxWidth = '30px';
+    th.textContent = topic;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  d.teams.forEach(function(team) {
+    var tr = document.createElement('tr');
+    var labelTd = document.createElement('td');
+    labelTd.className = 'team-label';
+    labelTd.textContent = team;
+    tr.appendChild(labelTd);
+    d.data[team].forEach(function(v) {
+      var td = document.createElement('td');
+      td.style.background = topicHeatColor(v);
+      td.style.color = v > 0 ? '#e6edf3' : 'transparent';
+      td.textContent = v > 0 ? v : '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+// ── 7c. Topic Stacked Bar ──────────────────────────────────────────
+function renderTopicStacked() {
+  var d = DATA.topic_analysis;
+  var ctx = document.getElementById('topicStackedChart').getContext('2d');
+  if (charts.topicStacked) charts.topicStacked.destroy();
+
+  var topicColors = [
+    '#58a6ff','#3fb950','#f85149','#d29922','#bc8cff','#39d2c0',
+    '#f778ba','#79c0ff','#ffa657','#7ee787','#ff7b72','#d2a8ff',
+    '#a5d6ff','#56d364','#ffa198'
+  ];
+
+  var datasets = d.topics.map(function(topic, idx) {
+    return {
+      label: topic,
+      data: DATA.team_activity.teams.map(function(t) { return d.per_team[t][idx]; }),
+      backgroundColor: topicColors[idx % topicColors.length],
+    };
+  });
+
+  charts.topicStacked = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: DATA.team_activity.teams, datasets: datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      }
+    }
+  });
+}
+
+// ── 13. Detailed Topic Deep Dive ───────────────────────────────────
+function renderDetailedTopics(category, selectedTeam) {
+  var d = DATA.detailed_topics;
+  if (!category) category = d.categories[0];
+
+  var subs = d.subtopics[category];
+
+  // Sort subtopics by total count descending
+  var sorted = subs.slice().sort(function(a, b) {
+    return (d.totals[category][b] || 0) - (d.totals[category][a] || 0);
+  });
+
+  // Bar chart: subtopic counts for selected category
+  var ctx1 = document.getElementById('subtopicBarChart').getContext('2d');
+  if (charts.subtopicBar) charts.subtopicBar.destroy();
+
+  var barData;
+  if (selectedTeam && selectedTeam !== 'all') {
+    barData = sorted.map(function(sub) {
+      return d.per_team[selectedTeam] ? (d.per_team[selectedTeam][category][sub] || 0) : 0;
+    });
+  } else {
+    barData = sorted.map(function(sub) { return d.totals[category][sub] || 0; });
+  }
+
+  var subtopicColors = [
+    '#58a6ff','#3fb950','#f85149','#d29922','#bc8cff','#39d2c0',
+    '#f778ba','#79c0ff','#ffa657','#7ee787','#ff7b72','#d2a8ff'
+  ];
+
+  document.getElementById('subtopicBarTitle').textContent = category + ' — Subtopic Breakdown' +
+    (selectedTeam && selectedTeam !== 'all' ? ' (' + selectedTeam + ')' : '');
+
+  charts.subtopicBar = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: sorted,
+      datasets: [{
+        label: selectedTeam && selectedTeam !== 'all' ? selectedTeam : 'All Teams',
+        data: barData,
+        backgroundColor: sorted.map(function(_, i) { return subtopicColors[i % subtopicColors.length]; }),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } },
+    }
+  });
+
+  // Stacked bar: subtopics per team for this category
+  var ctx2 = document.getElementById('subtopicTeamChart').getContext('2d');
+  if (charts.subtopicTeam) charts.subtopicTeam.destroy();
+
+  var datasets = sorted.map(function(sub, idx) {
+    return {
+      label: sub,
+      data: d.teams.map(function(t) {
+        return d.per_team[t] ? (d.per_team[t][category][sub] || 0) : 0;
+      }),
+      backgroundColor: subtopicColors[idx % subtopicColors.length],
+    };
+  });
+
+  charts.subtopicTeam = new Chart(ctx2, {
+    type: 'bar',
+    data: { labels: d.teams, datasets: datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      }
+    }
+  });
+}
+
+function renderDetailedTopicHeatmap() {
+  var d = DATA.detailed_topics;
+  var container = document.getElementById('detailedTopicHeatmapContainer');
+  container.replaceChildren();
+
+  // Build a flat list of all subtopics grouped by category
+  var allSubs = [];
+  var catHeaders = [];
+  d.categories.forEach(function(cat) {
+    var subs = d.subtopics[cat].slice().sort(function(a, b) {
+      return (d.totals[cat][b] || 0) - (d.totals[cat][a] || 0);
+    });
+    catHeaders.push({ cat: cat, startIdx: allSubs.length, count: subs.length });
+    subs.forEach(function(sub) {
+      allSubs.push({ cat: cat, sub: sub });
+    });
+  });
+
+  // Find max for color scaling
+  var maxVal = 0;
+  d.teams.forEach(function(team) {
+    allSubs.forEach(function(entry) {
+      var v = d.per_team[team] ? (d.per_team[team][entry.cat][entry.sub] || 0) : 0;
+      if (v > maxVal) maxVal = v;
+    });
+  });
+
+  function detailHeatColor(val) {
+    if (val === 0) return 'transparent';
+    var logMax = Math.log(maxVal + 1);
+    var logVal = Math.log(val + 1);
+    var intensity = logVal / logMax;
+    var r = Math.round(57 + (248 - 57) * intensity);
+    var g = Math.round(210 - 130 * intensity);
+    var b = Math.round(192 - 120 * intensity);
+    var a = 0.15 + 0.85 * intensity;
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  var table = document.createElement('table');
+  table.className = 'heatmap-table';
+  table.style.minWidth = (allSubs.length * 38 + 80) + 'px';
+
+  // Header row with subtopic names
+  var thead = document.createElement('thead');
+
+  // Category grouping row
+  var catRow = document.createElement('tr');
+  var emptyTh = document.createElement('th');
+  catRow.appendChild(emptyTh);
+  catHeaders.forEach(function(ch) {
+    var th = document.createElement('th');
+    th.colSpan = ch.count;
+    th.textContent = ch.cat;
+    th.style.fontSize = '0.7rem';
+    th.style.borderBottom = '2px solid #58a6ff';
+    th.style.textAlign = 'center';
+    th.style.color = '#58a6ff';
+    catRow.appendChild(th);
+  });
+  thead.appendChild(catRow);
+
+  // Subtopic name row
+  var subRow = document.createElement('tr');
+  var emptyTh2 = document.createElement('th');
+  subRow.appendChild(emptyTh2);
+  allSubs.forEach(function(entry) {
+    var th = document.createElement('th');
+    th.style.writingMode = 'vertical-lr';
+    th.style.transform = 'rotate(180deg)';
+    th.style.fontSize = '0.6rem';
+    th.style.maxWidth = '24px';
+    th.textContent = entry.sub;
+    subRow.appendChild(th);
+  });
+  thead.appendChild(subRow);
+  table.appendChild(thead);
+
+  // Body
+  var tbody = document.createElement('tbody');
+  d.teams.forEach(function(team) {
+    var tr = document.createElement('tr');
+    var labelTd = document.createElement('td');
+    labelTd.className = 'team-label';
+    labelTd.textContent = team;
+    tr.appendChild(labelTd);
+
+    allSubs.forEach(function(entry) {
+      var v = d.per_team[team] ? (d.per_team[team][entry.cat][entry.sub] || 0) : 0;
+      var td = document.createElement('td');
+      td.style.background = detailHeatColor(v);
+      td.style.color = v > 0 ? '#e6edf3' : 'transparent';
+      td.style.fontSize = '0.6rem';
+      td.textContent = v > 0 ? v : '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+function setupDetailedTopicFilters() {
+  var d = DATA.detailed_topics;
+  var catSelect = document.getElementById('categoryFilter');
+  d.categories.forEach(function(cat) {
+    var opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    catSelect.appendChild(opt);
+  });
+
+  var teamSelect = document.getElementById('deepDiveTeamFilter');
+  d.teams.forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    teamSelect.appendChild(opt);
+  });
+
+  function update() {
+    renderDetailedTopics(catSelect.value, teamSelect.value);
+  }
+
+  catSelect.addEventListener('change', update);
+  teamSelect.addEventListener('change', update);
+}
+
+// ── 11. Agent vs Chat ──────────────────────────────────────────────
+function renderAgentUsage() {
+  var d = DATA.agent_usage;
+
+  // Agentic vs Chat stacked bar
+  var ctx1 = document.getElementById('agentVsChatChart').getContext('2d');
+  if (charts.agentChat) charts.agentChat.destroy();
+  charts.agentChat = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: d.teams,
+      datasets: [
+        {
+          label: 'Agentic (with tools)',
+          data: d.agentic,
+          backgroundColor: 'rgba(188,140,255,0.7)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Chat (no tools)',
+          data: d.chat,
+          backgroundColor: 'rgba(88,166,255,0.35)',
+          borderRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            afterBody: function(items) {
+              var idx = items[0].dataIndex;
+              var a = d.agentic[idx];
+              var c = d.chat[idx];
+              var total = a + c;
+              return 'Agentic rate: ' + (a/total*100).toFixed(0) + '%';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      }
+    }
+  });
+
+  // Conversation depth
+  var ctx2 = document.getElementById('convDepthChart').getContext('2d');
+  if (charts.convDepth) charts.convDepth.destroy();
+  charts.convDepth = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: d.conv_depth.teams,
+      datasets: [
+        {
+          label: 'Avg Messages',
+          data: d.conv_depth.avg,
+          backgroundColor: 'rgba(57,210,192,0.6)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Median',
+          data: d.conv_depth.median,
+          backgroundColor: 'rgba(63,185,80,0.6)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Max',
+          data: d.conv_depth.max,
+          backgroundColor: 'rgba(210,153,34,0.4)',
+          borderRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { beginAtZero: true } },
+    }
+  });
+
+  // Tool doughnut
+  var ctx3 = document.getElementById('toolDoughnutChart').getContext('2d');
+  if (charts.toolDoughnut) charts.toolDoughnut.destroy();
+  var toolColors = [
+    '#58a6ff','#3fb950','#f85149','#d29922','#bc8cff','#39d2c0',
+    '#f778ba','#79c0ff','#ffa657','#7ee787','#ff7b72','#d2a8ff',
+    '#a5d6ff','#56d364','#ffa198','#c9d1d9'
+  ];
+  charts.toolDoughnut = new Chart(ctx3, {
+    type: 'doughnut',
+    data: {
+      labels: d.tools,
+      datasets: [{ data: d.tool_totals, backgroundColor: toolColors }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var total = ctx.dataset.data.reduce(function(a,b) { return a+b; }, 0);
+              return ctx.label + ': ' + formatNum(ctx.raw) + ' (' + (ctx.raw/total*100).toFixed(1) + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Tool per team stacked bar (top 8 tools)
+  var ctx4 = document.getElementById('toolTeamChart').getContext('2d');
+  if (charts.toolTeam) charts.toolTeam.destroy();
+  var top8Tools = d.tools.slice(0, 8);
+  var toolDatasets = top8Tools.map(function(tool, idx) {
+    var toolIdx = d.tools.indexOf(tool);
+    return {
+      label: tool,
+      data: d.teams.map(function(t) { return d.tool_per_team[t][toolIdx]; }),
+      backgroundColor: toolColors[idx % toolColors.length],
+    };
+  });
+  charts.toolTeam = new Chart(ctx4, {
+    type: 'bar',
+    data: { labels: d.teams, datasets: toolDatasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true, ticks: { callback: function(v) { return formatNum(v); } } },
+      }
+    }
+  });
+
+  // Tool heatmap
+  renderToolHeatmap();
+}
+
+function renderToolHeatmap() {
+  var d = DATA.agent_usage;
+  var container = document.getElementById('toolHeatmapContainer');
+  container.replaceChildren();
+
+  // Only show tools with meaningful counts
+  var toolsToShow = d.tools.filter(function(t, i) { return d.tool_totals[i] >= 10; });
+
+  var maxVal = 0;
+  d.teams.forEach(function(team) {
+    toolsToShow.forEach(function(tool) {
+      var idx = d.tools.indexOf(tool);
+      var v = d.tool_per_team[team][idx];
+      if (v > maxVal) maxVal = v;
+    });
+  });
+
+  function toolHeatColor(val) {
+    if (val === 0) return 'transparent';
+    // Use log scale for better visual spread
+    var logMax = Math.log(maxVal + 1);
+    var logVal = Math.log(val + 1);
+    var intensity = logVal / logMax;
+    var r = Math.round(188 - 100 * intensity);
+    var g = Math.round(140 + 70 * intensity);
+    var b = Math.round(255 - 100 * intensity);
+    var a = 0.2 + 0.8 * intensity;
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  var table = document.createElement('table');
+  table.className = 'heatmap-table';
+
+  var thead = document.createElement('thead');
+  var headerRow = document.createElement('tr');
+  var emptyTh = document.createElement('th');
+  headerRow.appendChild(emptyTh);
+  toolsToShow.forEach(function(tool) {
+    var th = document.createElement('th');
+    th.style.writingMode = 'vertical-lr';
+    th.style.transform = 'rotate(180deg)';
+    th.style.fontSize = '0.65rem';
+    th.textContent = tool;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  d.teams.forEach(function(team) {
+    var tr = document.createElement('tr');
+    var labelTd = document.createElement('td');
+    labelTd.className = 'team-label';
+    labelTd.textContent = team;
+    tr.appendChild(labelTd);
+    toolsToShow.forEach(function(tool) {
+      var idx = d.tools.indexOf(tool);
+      var v = d.tool_per_team[team][idx];
+      var td = document.createElement('td');
+      td.style.background = toolHeatColor(v);
+      td.style.color = v > 0 ? '#e6edf3' : 'transparent';
+      td.textContent = v > 0 ? formatNum(v) : '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+// ── Filter Controls ────────────────────────────────────────────────
+function setupFilters() {
+  var teamSelect = document.getElementById('teamFilter');
+  DATA.executive_summary.active_teams.forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    teamSelect.appendChild(opt);
+  });
+
+  teamSelect.addEventListener('change', function() {
+    var val = teamSelect.value;
+    renderTimeline(val);
+    renderTopicAnalysis(val);
+  });
+}
+
+// ── Initialize ─────────────────────────────────────────────────────
+function init() {
+  var renderSteps = [
+    ['setupFilters', setupFilters],
+    ['setupDetailedTopicFilters', setupDetailedTopicFilters],
+    ['renderSummary', renderSummary],
+    ['renderTeamActivity', renderTeamActivity],
+    ['renderTimeline', function() { renderTimeline('all'); }],
+    ['renderTokenUsage', renderTokenUsage],
+    ['renderModelUsage', renderModelUsage],
+    ['renderBlockedAnalysis', renderBlockedAnalysis],
+    ['renderTopicAnalysis', function() { renderTopicAnalysis('all'); }],
+    ['renderTopicHeatmap', renderTopicHeatmap],
+    ['renderTopicStacked', renderTopicStacked],
+    ['renderDetailedTopics', function() { renderDetailedTopics(DATA.detailed_topics.categories[0], 'all'); }],
+    ['renderDetailedTopicHeatmap', renderDetailedTopicHeatmap],
+    ['renderAgentUsage', renderAgentUsage],
+    ['renderResponseTimes', renderResponseTimes],
+    ['renderTeamTable', renderTeamTable],
+    ['renderHeatmap', renderHeatmap],
+  ];
+  renderSteps.forEach(function(step) {
+    try { step[1](); } catch(e) { console.error('Error in ' + step[0] + ':', e); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
